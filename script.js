@@ -683,9 +683,9 @@ function displayProducts(productsToShow) {
     `).join('');
 }
 
-function showProductDetail(productId) {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
+     function showProductDetail(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
     
     // Update product detail modal
     document.getElementById('productDetailImage').src = product.images[0];
@@ -727,7 +727,9 @@ function showProductDetail(productId) {
     
     // Show modal
     document.getElementById('productModal').classList.add('active');
-    currentZoom = 1;
+       currentZoom = 1;
+            const productImage = document.getElementById('productDetailImage');
+            productImage.style.transform = 'scale(1)';
 }
 
 function getColorCode(colorName) {

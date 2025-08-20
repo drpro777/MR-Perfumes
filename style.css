@@ -4656,3 +4656,20 @@ body.home-page .back-to-home {
             }
         }
         
+
+         .product-modal-image img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            transform-origin: center center;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Add smooth transition for modal */
+        .modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            transform: scale(1);
+        }
