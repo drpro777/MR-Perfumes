@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Store - Your World of Products</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <!-- Add these in your HTML head -->
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="logo-animation">
+            <div class="earth-container">
+                <div class="earth">
+                    <div class="continent continent1"></div>
+                    <div class="continent continent2"></div>
+                    <div class="continent continent3"></div>
+                </div>
+                <div class="orbit">
+                    <div class="satellite"></div>
+                </div>
+            </div>
+            <h2 class="company-name">Global Store</h2>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+ 
+
+<header class="header" id="header">
+    <nav class="navbar">
+        <!-- Mobile menu button (left side on mobile) -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-brand">
+            <a href="#" class="logo-link">
+                <img src="logo.png" alt="Company Logo" class="nav-logo">
+            </a>
+        </div>
+        
+      <div class="nav-menu" id="navMenu">
+            <a href="#" class="nav-link active" data-page="home" data-key="nav_home">Home</a>
+            <a href="#" class="nav-link" data-page="products" data-key="nav_products">Products</a>
+    
+            <a href="#" class="nav-link" data-page="cart" data-key="nav_cart">
+                Cart <span class="cart-count" id="cartCount">0</span>
+            </a>
+            <a href="#" class="nav-link" data-page="services" data-key="nav_services">Services</a>
+            <a href="#" class="nav-link" data-page="contact" data-key="nav_contact">Contact Us</a>
+            <a href="#" class="nav-link" id="secretPageBtn" data-key="Admin">Secret Page</a>
+        </div>
+        
+          <div class="nav-actions">
+            <button class="settings-btn" id="settingsBtn">
+                <i class="fas fa-cog"></i>
+            </button>
+            <button class="auth-btn" id="authBtn" data-key="login">Login</button>
+            <button class="profile-btn" id="profileBtn" style="display: none;">
+                <img src="" alt="Profile" id="profileImg">
+            </button>
+        <!-- Password Modal -->
+        <div class="modal" id="passwordModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Enter Password</h3>
+                    <button class="close-btn" id="closePasswordModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="password" id="secretPassword" placeholder="Enter secret password">
+                        <p id="passwordError" class="error-message" style="color: red; display: none;">Incorrect password</p>
+                    </div>
+                    <button class="auth-submit-btn" id="submitPassword">Submit</button>
+                </div>
+            </div>
+        </div>
+        
+        
+        <!-- Secret Page (hidden by default) -->
+        <section id="secretPage" class="page">
+            <div class="container">
+                <h2>Welcome to the Secret Page</h2>
+                <p>This content is only visible after entering the correct password.</p>
+                <a href="#" class="nav-link" data-page="admin" data-key="Admin">Admin</a>
+            </div>
+        </section>
+           
+        </div>
+    </nav>
+</header>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-key="settings">Settings</h3>
+                <button class="close-btn" id="closeSettings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label data-key="language">Language</label>
+                    <select id="languageSelect">
+                        <option value="en">English</option>
+                        <option value="ur">اردو</option>
+                        <option value="ar">العربية</option>
+                        <option value="tr">Türkçe</option>
+                        <option value="pt">Português</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label data-key="theme">Theme</label>
+                    <div class="theme-switch">
+                        <button class="theme-btn active" data-theme="light">
+                            <i class="fas fa-sun"></i> Light
+                        </button>
+                        <button class="theme-btn" data-theme="dark">
+                            <i class="fas fa-moon"></i> Dark
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="authModalTitle" data-key="login">Login</h3>
+                <button class="close-btn" id="closeAuth">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <input type="email" id="loginEmail" required placeholder="Email">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="loginPassword" required placeholder="Password">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <button type="submit" class="auth-submit-btn" data-key="login">Login</button>
+                    <p class="auth-switch">
+                        Don't have an account? 
+                        <a href="#" id="showSignup" data-key="signup">Sign Up</a>
+                    </p>
+                </form>
+
+                <!-- Signup Form -->
+                <form id="signupForm" class="auth-form" style="display: none;">
+                    <div class="signup-step active" id="step1">
+                        <div class="form-group">
+                            <input type="text" id="signupName" required placeholder="Full Name">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="signupEmail" required placeholder="Email">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" id="signupPhone" required placeholder="Phone Number">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="signupCity" required placeholder="City">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="form-group">
+                            <input type="url" id="profilePhotoUrl" placeholder="Profile Photo URL">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <button type="button" class="next-btn" id="nextStep" data-key="next">Next</button>
+                    </div>
+
+                    <div class="signup-step" id="step2">
+                        <div class="form-group">
+                            <input type="password" id="signupPassword" required placeholder="Create Password">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill"></div>
+                            </div>
+                            <span class="strength-text" data-key="weak">Weak</span>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="confirmPassword" required placeholder="Confirm Password">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <button type="submit" class="auth-submit-btn" data-key="create_account">Create Account</button>
+                    </div>
+
+                    <p class="auth-switch">
+                        Already have an account? 
+                        <a href="#" id="showLogin" data-key="login">Login</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+       <div class="offers-ticker">
+    <div class="ticker-content">
+        <span>🔥 50% OFF on Perfumes - Limited Time Offer!</span>
+        <span>🚚 Free Shipping on orders over PKR 2000</span>
+        <span>🎁 Special Discount on Perfumes - Buy 1 Get 1 Free</span>
+        <span>💳 Easy EMI Options Available</span>
+    </div>
+</div>
+
+<main class="main-content">
+    <!-- Home Page -->
+    <section id="homePage" class="page active">
+        <div class="hero-section">
+            <!-- Photo slideer with 3D Animation -->
+            <div class="hero-slideer">
+                <div class="slideer-track">
+                    <div class="slidee active" style="background-image: url('https://thumbs.dreamstime.com/b/luxury-designer-perfume-fragrance-bottles-variety-gorgeous-expensive-variety-shapes-colors-34275623.jpg')"></div>
+                    <div class="slidee" style="background-image: url('https://images.pexels.com/photos/30981935/pexels-photo-30981935.jpeg')"></div>
+                    <div class="slidee" style="background-image: url('https://img.freepik.com/free-photo/red-composto-glass-jar-aroma-steam_114579-2422.jpg?w=360')"></div>
+                </div>
+            </div>
+
+            <!-- Hero Content -->
+            <div class="hero-content">
+                <h1 class="hero-title" data-key="hero_title">Premium Products Collection</h1>
+                <p class="hero-subtitle" data-key="hero_subtitle">Discover amazing products from around the world</p>
+                <div class="hero-buttons">
+                    <button class="cta-btn primary" id="shopNowBtn" data-key="shop_now">
+                        <span>Shop Now</span>
+                        <i class="fas fa-shopping-bag"></i>
+                    </button>
+                    <button class="cta-btn secondary" id="learnMoreBtn" data-key="learn_more">
+                        <span>Learn More</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+            <div class="features-section">
+                <div class="container">
+                    <h2 data-key="why_choose_us">Why Choose Us</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <i class="fas fa-shipping-fast"></i>
+                            <h3 data-key="fast_delivery">Fast Delivery</h3>
+                            <p data-key="fast_delivery_desc">Get your products delivered quickly and safely</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-shield-alt"></i>
+                            <h3 data-key="secure_payment">Secure Payment</h3>
+                            <p data-key="secure_payment_desc">Your payment information is always protected</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-headset"></i>
+                            <h3 data-key="support">24/7 Support</h3>
+                            <p data-key="support_desc">We're here to help you anytime, anywhere</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-undo"></i>
+                            <h3 data-key="return_policy">Easy Returns</h3>
+                            <p data-key="return_policy_desc">30-day return policy for your peace of mind</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </section>
+
+
+        <!-- Products Page -->
+        <section id="productsPage" class="page">
+                <div class="slider-container">
+        <div class="slider">
+            <div class="slide active">
+                <div class="slide-number">1</div>
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e" class="slide-image" alt="Premium Headphones">
+                <div class="slide-content">
+                    <h3 class="slide-title">Wireless Headphones</h3>
+                    <p class="slide-description">Experience crystal clear sound with our noise cancellation technology.</p>
+                    <div class="slide-price">$199.99</div>
+                </div>
+                <div class="slide-badge">BEST SELLER</div>
+            </div>
+            
+            <div class="slide">
+                <div class="slide-number">2</div>
+                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30" class="slide-image" alt="Smart Watch">
+                <div class="slide-content">
+                    <h3 class="slide-title">Smart Watch Pro</h3>
+                    <p class="slide-description">Track your fitness goals and stay connected with advanced features.</p>
+                    <div class="slide-price">$249.99</div>
+                </div>
+                <div class="slide-badge">NEW</div>
+            </div>
+            
+            <div class="slide">
+                <div class="slide-number">3</div>
+                <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d" class="slide-image" alt="Others Shoes">
+                <div class="slide-content">
+                    <h3 class="slide-title">Ultra Running Shoes</h3>
+                    <p class="slide-description">Designed for maximum comfort and performance during your runs.</p>
+                    <div class="slide-price">$129.99</div>
+                </div>
+                <div class="slide-badge">SALE</div>
+            </div>
+            
+            <div class="slide">
+                <div class="slide-number">4</div>
+                <img src="https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111" class="slide-image" alt="Sunglasses">
+                <div class="slide-content">
+                    <h3 class="slide-title">Designer Sunglasses</h3>
+                    <p class="slide-description">Protect your eyes in style with our premium polarized lenses.</p>
+                    <div class="slide-price">$159.99</div>
+                </div>
+                <div class="slide-badge">TRENDING</div>
+            </div>
+            
+            <div class="slide">
+                <div class="slide-number">5</div>
+                <img src="https://images.unsplash.com/photo-1546868871-7041f2a55e12" class="slide-image" alt="Smart Speaker">
+                <div class="slide-content">
+                    <h3 class="slide-title">Smart Speaker</h3>
+                    <p class="slide-description">Voice-controlled speaker with immersive 360° sound experience.</p>
+                    <div class="slide-price">$179.99</div>
+                </div>
+                <div class="slide-badge">HOT</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="slider-controls">
+        <button class="slider-btn prev-btn">Previous</button>
+        <button class="slider-btn next-btn">Next</button>
+    </div>
+    
+    <div class="slider-dots">
+        <div class="dot active" data-index="0"></div>
+        <div class="dot" data-index="1"></div>
+        <div class="dot" data-index="2"></div>
+        <div class="dot" data-index="3"></div>
+        <div class="dot" data-index="4"></div>
+    </div>
+            <div class="container">
+                <div class="products-header">
+                    <h2 data-key="our_products">Our Products</h2>
+                    <div class="products-controls">
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="Search products..." data-key="search_placeholder">
+                            <i class="fas fa-search"></i>
+                        </div>
+                       <select id="categoryFilter">
+    <option value="" data-key="all_categories">All Categories</option>
+    <option value="Perfumes" data-key="Perfumes">Perfumes</option>
+    <option value="Itar" data-key="Itar">Itar</option>
+    <option value="Jaynamaz" data-key="Jaynamaz">Jaynamaz</option>
+    <option value="home" data-key="home">Islamic Caps</option>
+    <option value="Others" data-key="Others">Others</option>
+</select>
+                    </div>
+                </div>
+                
+                <div class="products-grid" id="productsGrid">
+                    <!-- Products will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Detail Modal -->
+        <div class="modal product-modal" id="productModal">
+            <div class="modal-content product-modal-content">
+                <button class="close-btn" id="closeProductModal">&times;</button>
+                <div class="product-detail">
+                    <div class="product-images">
+                        <img id="productDetailImage" src="" alt="">
+                        <div class="zoom-controls">
+                            <button id="zoomIn"><i class="fas fa-search-plus"></i></button>
+                            <button id="zoomOut"><i class="fas fa-search-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h2 id="productDetailName"></h2>
+                        <div class="product-rating">
+                            <div class="stars" id="productStars"></div>
+                            <span id="productRating">4.5</span>
+                        </div>
+                        <div class="product-price">
+                            <span class="current-price" id="productDetailPrice"></span>
+                            <span class="original-price" id="productOriginalPrice"></span>
+                            <span class="discount" id="productDiscount"></span>
+                        </div>
+                        <div class="product-details">
+                            <div class="detail-item">
+                                <strong data-key="brand">Brand:</strong>
+                                <span id="productBrand"></span>
+                            </div>
+                            <div class="detail-item">
+                                <strong data-key="category">Category:</strong>
+                                <span id="productCategory"></span>
+                            </div>
+                            <div class="detail-item">
+                                <strong data-key="stock">Stock:</strong>
+                                <span id="productStock"></span>
+                            </div>
+                        </div>
+                        <div class="product-options">
+                            <div class="option-group">
+                                <label data-key="color">Color:</label>
+                                <div class="color-options" id="colorOptions"></div>
+                            </div>
+                            <div class="option-group">
+                                <label data-key="size">Size:</label>
+                                <select id="sizeOptions"></select>
+                            </div>
+                        </div>
+                        <div class="product-description">
+                            <p id="productDescription"></p>
+                        </div>
+                        <div class="product-actions">
+                            <button class="add-to-cart-btn" id="addToCartDetail">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span data-key="add_to_cart">Add to Cart</span>
+                            </button>
+                            <button class="buy-now-btn" id="buyNowDetail" data-key="buy_now">Buy Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Page -->
+        <section id="cartPage" class="page">
+            <div class="container">
+                <h2 data-key="shopping_cart">Shopping Cart</h2>
+                <div class="cart-content">
+                    <div class="cart-items" id="cartItems">
+                        <!-- Cart items will be loaded here -->
+                    </div>
+                     <div class="cart-summary">
+                    <div class="summary-item">
+                        <span data-key="subtotal">Subtotal:</span>
+                        <span id="cartSubtotal">PKR 18,498</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span data-key="shipping">Shipping:</span>
+                        <span id="cartShipping">PKR 200</span>
+                    </div>
+                    
+                    <!-- Delivery Charges -->
+                    <div class="summary-item">
+                        <span>Delivery:</span>
+                        <span id="deliveryCharge">Only Cash on Delivery</span>
+                    </div>
+                    
+                    <div class="summary-item total">
+                        <span data-key="total">Total:</span>
+                        <span id="cartTotal">PKR 18,848</span>
+                    </div>
+                    
+                    <button class="checkout-btn" id="checkoutBtn" data-key="checkout">
+                        <i class="fas fa-lock"></i> Proceed to Checkout
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Delivery Section -->
+               <div class="delivery-section">
+        <div class="delivery-header">
+            <div class="delivery-icon">
+                <i class="fas fa-truck"></i>
+            </div>
+            <h3 class="delivery-title">Delivery Options</h3>
+        </div>
+        
+        <div class="delivery-options">
+            <div class="delivery-option selected" data-price="150">
+                <div class="delivery-option-header">
+                    <span class="option-name">Standard Delivery</span>
+                    <span class="option-price">PKR 100</span>
+                </div>
+                <p class="option-desc">Doorstep delivery within 3-5 business days</p>
+                <div class="option-time">
+                    <i class="far fa-clock"></i>
+                    <span>3-5 days</span>
+                </div>
+            </div>
+            
+            <div class="delivery-option" data-price="300">
+                <div class="delivery-option-header">
+                    <span class="option-name">Express Delivery</span>
+                    <span class="option-price">PKR 180</span>
+                </div>
+                <p class="option-desc">Priority shipping within 1-2 business days</p>
+                <div class="option-time">
+                    <i class="far fa-clock"></i>
+                    <span>1-2 days</span>
+                </div>
+            </div>
+            
+            <div class="delivery-option" data-price="500">
+                <div class="delivery-option-header">
+                    <span class="option-name">Same Day Delivery</span>
+                    <span class="option-price">PKR 250</span>
+                </div>
+                <p class="option-desc">Get your order delivered within hours</p>
+                <div class="option-time">
+                    <i class="far fa-clock"></i>
+                    <span>Within 24 hours</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Delivery Bus Animation -->
+        <div class="delivery-bus-container">
+            <div class="delivery-road"></div>
+            <div class="delivery-bus">
+                <i class="fas fa-truck"></i>
+            </div>
+        </div>
+        
+        <div class="delivery-progress">
+            <div class="delivery-progress-bar"></div>
+        </div>
+        
+        <p class="delivery-estimation">Estimated delivery progress shown above</p>
+    </div>
+            </div>
+        </section>
+
+        <!-- Services Page -->
+        <section id="servicesPage" class="page">
+            <div class="container">
+                <h2 data-key="our_services">Our Services</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <i class="fas fa-shipping-fast"></i>
+                        <h3 data-key="fast_delivery">Fast Delivery</h3>
+                        <p data-key="delivery_desc">We offer same-day delivery in major cities and express shipping nationwide. Track your orders in real-time.</p>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-tools"></i>
+                        <h3 data-key="installation">Installation Service</h3>
+                        <p data-key="installation_desc">Professional installation service for Perfumes and home appliances by certified technicians.</p>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-shield-alt"></i>
+                        <h3 data-key="warranty">Extended Warranty</h3>
+                        <p data-key="warranty_desc">Protect your purchases with our comprehensive warranty plans and insurance coverage.</p>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-headset"></i>
+                        <h3 data-key="customer_support">Customer Support</h3>
+                        <p data-key="support_desc">24/7 multilingual customer support via phone, email, and live chat.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Page -->
+        <section id="contactPage" class="page">
+            <div class="container">
+                <h2 data-key="contact_us">Contact Us</h2>
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h4 data-key="address">Address</h4>
+                                <p>123 Global Street, Karachi, Pakistan</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <h4 data-key="phone">Phone</h4>
+                                <p>+92 300 1234567</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4 data-key="email">Email</h4>
+                                <p>info@globalstore.com</p>
+                            </div>
+                        </div>
+                    </div>
+                    <form class="contact-form" id="contactForm">
+                        <div class="form-group">
+                            <input type="text" required placeholder="Your Name" data-key="your_name">
+                        </div>
+                        <div class="form-group">
+                            <input type="email" required placeholder="Your Email" data-key="your_email">
+                        </div>
+                        <div class="form-group">
+                            <textarea required placeholder="Your Message" data-key="your_message"></textarea>
+                        </div>
+                        <button type="submit" data-key="send_message">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Page -->
+        <section id="profilePage" class="page">
+            <div class="container">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <img id="profileAvatar" src="https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop" alt="Profile">
+                    </div>
+                    <div class="profile-info">
+                        <h2 id="profileName">User Name</h2>
+                        <p id="profileEmail">user@email.com</p>
+                        <p class="join-date">Joined: <span id="joinDate">January 2024</span></p>
+                    </div>
+                    <button class="edit-profile-btn" id="editProfileBtn" data-key="edit_profile">Edit Profile</button>
+                </div>
+
+                <div class="profile-tabs">
+                    <button class="tab-btn active" data-tab="orders" data-key="orders">Orders</button>
+                    <button class="tab-btn" data-tab="addresses" data-key="addresses">Addresses</button>
+                    <button class="tab-btn" data-tab="settings" data-key="account_settings">Account Settings</button>
+                </div>
+
+                <div class="profile-content">
+                    <div class="tab-content active" id="ordersTab">
+                        <div class="orders-list" id="ordersList">
+                            <!-- Orders will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="addressesTab">
+                        <div class="addresses-list" id="addressesList">
+                            <!-- Addresses will be loaded here -->
+                        </div>
+                        <button class="add-address-btn" data-key="add_address">Add New Address</button>
+                    </div>
+
+                    <div class="tab-content" id="settingsTab">
+                        <div class="settings-list">
+                            <div class="setting-item">
+                                <label data-key="notifications">Email Notifications</label>
+                                <input type="checkbox" id="emailNotifications" checked>
+                            </div>
+                            <div class="setting-item">
+                                <label data-key="sms_notifications">SMS Notifications</label>
+                                <input type="checkbox" id="smsNotifications">
+                            </div>
+                            <button class="logout-btn" id="logoutBtn" data-key="logout">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Page -->
+        <section id="adminPage" class="page">
+            <div class="container">
+                <div class="admin-header">
+                    <h2>Admin Panel</h2>
+                    <button class="add-product-btn" id="addProductBtn">Add New Product</button>
+                </div>
+                
+                <div class="admin-tabs">
+                    <button class="tab-btn active" data-tab="products">Products</button>
+                    <button class="tab-btn" data-tab="customers">Customers</button>
+                    <button class="tab-btn" data-tab="orders">Orders</button>
+                </div>
+
+                <div class="admin-content">
+                    <div class="tab-content active" id="adminProductsTab">
+                        <div class="admin-products-grid" id="adminProductsGrid">
+                            <!-- Admin products will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="adminCustomersTab">
+                        <div class="customers-table" id="customersTable">
+                            <!-- Customers will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="adminOrdersTab">
+                        <div class="orders-table" id="adminOrdersTable">
+                            <!-- Orders will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Checkout Modal -->
+        <div class="modal" id="checkoutModal">
+            <div class="modal-content">
+                <!-- logo -->
+                   <div class="logo-container">
+                    <img src="icon.png" alt="Shop Logo" class="logo-img">
+                </div>
+                <div class="modal-header">
+                    <h3 data-key="checkout">Checkout</h3>
+                    <button class="close-btn" id="closeCheckout">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="checkoutForm">
+                        <div class="form-group">
+                            <input type="text" required placeholder="Full Name" id="checkoutName">
+                        </div>
+                        <div class="form-group">
+                            <input type="email" required placeholder="Email" id="checkoutEmail">
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" required placeholder="Phone Number" id="checkoutPhone">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" required placeholder="City" id="checkoutCity">
+                        </div>
+                        <div class="form-group">
+                            <textarea required placeholder="Complete Address" id="checkoutAddress"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <select required id="paymentMethod">
+                                <option value="">Select Delivery & Payment Opti..</option>
+                                <option value="Standard Delivery & COD">Standard Delivery & COD</option>
+                                <option value="card">Express Delivery & COD</option>
+                                <option value="Same Day Delivery & COD">Same Day Delivery & COD</option>
+                            </select>
+                            
+                        </div>
+                        <button type="submit" class="place-order-btn">Place Order</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Form Modal -->
+        <div class="modal" id="productFormModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="productFormTitle">Add New Product</h3>
+                    <button class="close-btn" id="closeProductForm">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm">
+                        <div class="form-group">
+                            <input type="text" required placeholder="Product Name" id="productFormName">
+                        </div>
+                        <div class="form-group">
+                            <select required id="productFormCategory">
+                                <option value="">Select Category</option>
+                                <option value="Perfumes">Perfumes</option>
+                                <option value="Itar">Itar</option>
+                                <option value="Jaynamaz">Jaynamaz</option>
+                                <option value="home">Islamic Caps</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" required placeholder="Price (PKR)" id="productFormPrice">
+                        </div>
+                        <div class="form-group">
+                            <input type="number" required placeholder="Original Price (PKR)" id="productFormOriginalPrice">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" required placeholder="Brand" id="productFormBrand">
+                        </div>
+                        <div class="form-group">
+                            <input type="number" required placeholder="Stock Quantity" id="productFormStock">
+                        </div>
+                        <div class="form-group">
+                            <input type="url" required placeholder="Primary Image URL" id="productFormImage1">
+                        </div>
+                        <div class="form-group">
+                            <input type="url" placeholder="Secondary Image URL" id="productFormImage2">
+                        </div>
+                        <div class="form-group">
+                            <textarea required placeholder="Product Description" id="productFormDescription"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" placeholder="Available Colors (comma separated)" id="productFormColors">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" placeholder="Available Sizes (comma separated)" id="productFormSizes">
+                        </div>
+                        <button type="submit" id="productFormSubmit">Add Product</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav" id="bottomNav">
+        <a href="#" class="bottom-nav-item active" data-page="home">
+            <i class="fas fa-home"></i>
+            <span data-key="nav_home">Home</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-page="products">
+            <i class="fas fa-shopping-bag"></i>
+            <span data-key="nav_products">Products</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-page="cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span data-key="nav_cart">Cart</span>
+            <span class="cart-badge" id="bottomCartCount">0</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-page="contact">
+            <i class="fas fa-envelope"></i>
+            <span data-key="nav_contact">Contact</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-page="profile" id="bottomProfileLink">
+            <i class="fas fa-user"></i>
+            <span data-key="profile">Profile</span>
+        </a>
+    </nav>
+
+    <script src="firebase.js"></script>
+    <script src="trans.js"></script>
+    <script src="script.js"></script>
+    <div class="back-to-home" id="backToHome" title="Back to Home">
+    <i class="fas fa-arrow-up"><a href="#home"></a></i>
+</div>
+<!-- 3D Footer -->
+<footer class="footer-3d">
+    <div class="footer-wave"></div>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>Global Store</h3>
+            <p>Your world of products at unbeatable prices. Quality you can trust, service you deserve.</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+        
+        <div class="footer-section">
+            <h3>Quick Links</h3>
+            <ul>
+                <li><a href="#" data-page="home">Home</a></li>
+                <li><a href="#" data-page="products">Products</a></li>
+                <li><a href="#" data-page="services">Services</a></li>
+                <li><a href="#" data-page="contact">Contact</a></li>
+                <li><a href="#" data-page="cart">Cart</a></li>
+            </ul>
+        </div>
+        
+        <div class="footer-section">
+            <h3>Contact Info</h3>
+            <ul>
+                <li><i class="fas fa-map-marker-alt"></i> 123 Global Street, Karachi, Pakistan</li>
+                <li><i class="fas fa-phone"></i> +92 300 1234567</li>
+                <li><i class="fas fa-envelope"></i> info@globalstore.com</li>
+                <li><i class="fas fa-clock"></i> Mon-Sat: 9AM - 8PM</li>
+            </ul>
+        </div>
+        
+        <div class="footer-section">
+            <h3>Newsletter</h3>
+            <p>Subscribe to get updates on new arrivals and special offers</p>
+            <form class="newsletter-form">
+                <input type="email" placeholder="Your Email" required>
+                <button type="submit">Subscribe</button>
+            </form>
+        </div>
+    </div>
+    <div class="payment-methods">
+    <div class="payment-card">
+        <i class="fab fa-cc-visa"></i>
+    </div>
+    <div class="payment-card">
+        <i class="fab fa-cc-mastercard"></i>
+    </div>
+    <div class="payment-card">
+        <i class="fab fa-cc-paypal"></i>
+    </div>
+    <div class="payment-card">
+        <i class="fab fa-cc-apple-pay"></i>
+    </div>
+       <div class="footer-bottom">
+        <p>&copy; Copyright © 2025 - MR Perfums Official  All rights reserved.   Powered by Muhammad ALi</p>
+       
+    </div>
+</div>
+</footer>
+<script>
+// Enhanced 3D slideer with zoom and parallax effects
+document.addEventListener('DOMContentLoaded', function() {
+    const slideerTrack = document.querySelector('.slideer-track');
+    const slidees = document.querySelectorAll('.slidee');
+    const totalslidees = slidees.length;
+    let currentIndex = 0;
+    
+    // Clone slidees for seamless looping
+    const firstslidee = slidees[0].cloneNode(true);
+    const secondslidee = slidees[1].cloneNode(true);
+    slideerTrack.appendChild(firstslidee);
+    slideerTrack.appendChild(secondslidee);
+    
+    // Auto-advance slidees with enhanced effects
+    function nextslidee() {
+        currentIndex = (currentIndex + 1) % (totalslidees + 2);
+        updateslideer();
+    }
+    
+    function updateslideer() {
+        const offset = -currentIndex * (100 / 3);
+        const scale = 1 + (0.05 * Math.sin(Date.now() / 1000)); // Subtle pulsing effect
+        
+        slideerTrack.style.transform = `translateX(${offset}%) scale(${scale})`;
+        slideerTrack.style.transition = 'transform 2s cubic-bezier(0.33, 1, 0.68, 1)';
+        
+        // Add class to current slidee for additional effects
+        slidees.forEach((slidee, index) => {
+            if (index === currentIndex % totalslidees) {
+                slidee.classList.add('active-slidee');
+            } else {
+                slidee.classList.remove('active-slidee');
+            }
+        });
+    }
+    
+    // Reset position when reaching clones
+    slideerTrack.addEventListener('transitionend', function() {
+        if (currentIndex >= totalslidees) {
+            slideerTrack.style.transition = 'none';
+            currentIndex = 0;
+            slideerTrack.style.transform = 'translateX(0) scale(1)';
+            void slideerTrack.offsetWidth; // Force reflow
+        }
+    });
+    
+    // Start auto-sliding with variable timing
+    let slideeInterval = setInterval(nextslidee, 6000);
+    
+    // Pause on hover with smooth resume
+    const slideer = document.querySelector('.hero-slideer');
+    slideer.addEventListener('mouseenter', () => {
+        clearInterval(slideeInterval);
+        slideerTrack.style.transition = 'transform 0.5s ease-out';
+        slideerTrack.style.transform = `${slideerTrack.style.transform} scale(1.02)`;
+    });
+    
+    slideer.addEventListener('mouseleave', () => {
+        slideerTrack.style.transition = 'transform 0.5s ease-out';
+        slideerTrack.style.transform = slideerTrack.style.transform.replace('scale(1.02)', 'scale(1)');
+        setTimeout(() => {
+            slideeInterval = setInterval(nextslidee, 6000);
+        }, 500);
+    });
+    
+    // Initialize
+    updateslideer();
+    
+    // Add mousemove parallax effect
+    document.addEventListener('mousemove', (e) => {
+        const x = e.clientX / window.innerWidth - 0.5;
+        const y = e.clientY / window.innerHeight - 0.5;
+        slideerTrack.style.transform = `${slideerTrack.style.transform} rotateX(${y * 2}deg) rotateY(${x * 2}deg)`;
+    });
+});
+</script>
+  <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slider = document.querySelector('.slider');
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            
+            let currentSlide = 0;
+            const slideCount = slides.length;
+            let autoSlideInterval;
+            
+            // Initialize slider
+            function initSlider() {
+                updateSlider();
+                startAutoSlide();
+            }
+            
+            // Update slider position
+            function updateSlider() {
+                slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+                
+                // Update active class for slides
+                slides.forEach((slide, index) => {
+                    slide.classList.toggle('active', index === currentSlide);
+                });
+                
+                // Update active dot
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentSlide);
+                });
+            }
+            
+            // Go to next slide
+            function nextSlide() {
+                currentSlide = (currentSlide + 1) % slideCount;
+                updateSlider();
+            }
+            
+            // Go to previous slide
+            function prevSlide() {
+                currentSlide = (currentSlide - 1 + slideCount) % slideCount;
+                updateSlider();
+            }
+            
+            // Start auto sliding
+            function startAutoSlide() {
+                autoSlideInterval = setInterval(nextSlide, 5000);
+            }
+            
+            // Stop auto sliding
+            function stopAutoSlide() {
+                clearInterval(autoSlideInterval);
+            }
+            
+            // Event listeners for buttons
+            nextBtn.addEventListener('click', () => {
+                nextSlide();
+                stopAutoSlide();
+                startAutoSlide();
+            });
+            
+            prevBtn.addEventListener('click', () => {
+                prevSlide();
+                stopAutoSlide();
+                startAutoSlide();
+            });
+            
+            // Event listeners for dots
+            dots.forEach(dot => {
+                dot.addEventListener('click', function() {
+                    currentSlide = parseInt(this.getAttribute('data-index'));
+                    updateSlider();
+                    stopAutoSlide();
+                    startAutoSlide();
+                });
+            });
+            
+            // Pause auto slide when hovering over slider
+            slider.addEventListener('mouseenter', stopAutoSlide);
+            slider.addEventListener('mouseleave', startAutoSlide);
+            
+            // Initialize the slider
+            initSlider();
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modalOverlay = document.getElementById('modalOverlay');
+            const openModalBtn = document.getElementById('openModal');
+            const closeCheckoutBtn = document.getElementById('closeCheckout');
+            const checkoutForm = document.getElementById('checkoutForm');
+            
+            // Open modal
+            openModalBtn.addEventListener('click', function() {
+                modalOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+            
+            // Close modal function
+            function closeModal() {
+                modalOverlay.classList.add('closing');
+                setTimeout(() => {
+                    modalOverlay.classList.remove('active', 'closing');
+                    document.body.style.overflow = 'auto';
+                }, 400);
+            }
+            
+            // Close modal events
+            closeCheckoutBtn.addEventListener('click', closeModal);
+            
+            // Form submission
+            checkoutForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const placeOrderBtn = this.querySelector('.place-order-btn');
+                placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                placeOrderBtn.disabled = true;
+                
+                // Simulate order processing
+                setTimeout(() => {
+                    placeOrderBtn.innerHTML = '<i class="fas fa-check"></i> Order Placed!';
+                    placeOrderBtn.style.background = 'var(--success-color)';
+                    
+                    setTimeout(() => {
+                        closeModal();
+                        // Reset form and button
+                        setTimeout(() => {
+                            checkoutForm.reset();
+                            placeOrderBtn.innerHTML = 'Place Order';
+                            placeOrderBtn.style.background = '';
+                            placeOrderBtn.disabled = false;
+                        }, 500);
+                    }, 1500);
+                }, 2000);
+            });
+            
+            // Close modal when clicking outside
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) {
+                    closeModal();
+                }
+            });
+            
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
+                    closeModal();
+                }
+            });
+            
+            // Add input validation effects
+            const inputs = document.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this.value.trim() !== '') {
+                        this.classList.add('filled');
+                    } else {
+                        this.classList.remove('filled');
+                    }
+                });
+            });
+        });
+    </script>
+   
+</body>
+</html>
