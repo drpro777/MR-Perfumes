@@ -284,6 +284,9 @@ function setupEventListeners() {
             }
         });
     });
+        // Profile photo upload
+    document.getElementById('profileImg').addEventListener('click', handleProfilePhotoUpload);
+    document.getElementById('profileAvatar').addEventListener('click', handleProfilePhotoUpload);
     
     // Mobile menu
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -567,13 +570,30 @@ function handleSignup(e) {
         return;
     }
     
+     // Get profile photo (if uploaded during signup)
+    const profilePhotoInput = document.getElementById('profilePhotoInput');
+    let profileImage = 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop';
+    
+    if (profilePhotoInput && profilePhotoInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            profileImage = e.target.result;
+            completeSignup(profileImage);
+        };
+        reader.readAsDataURL(profilePhotoInput.files[0]);
+    } else {
+        completeSignup(profileImage);
+    }
+}
+
+function completeSignup(profileImage) {
     const userData = {
         id: Date.now(),
         name: document.getElementById('signupName').value,
         email: document.getElementById('signupEmail').value,
         phone: document.getElementById('signupPhone').value,
         city: document.getElementById('signupCity').value,
-        profileImage: document.getElementById('profilePhotoUrl').value || 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
+        profileImage: profileImage,
         joinDate: new Date().toISOString()
     };
     
@@ -584,6 +604,7 @@ function handleSignup(e) {
     
     showNotification('Account created successfully!', 'success');
 }
+
 
 function handleLogout() {
     currentUser = null;
@@ -1418,4 +1439,40 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         //  slider
-        
+        function handleProfilePhotoUpload() {
+    const profileImg = document.getElementById('profileImg');
+    const profileAvatar = document.getElementById('profileAvatar');
+    
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    
+    // Add event listener for when a file is selected
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                const imageDataUrl = event.target.result;
+                
+                // Update profile images
+                if (profileImg) profileImg.src = imageDataUrl;
+                if (profileAvatar) profileAvatar.src = imageDataUrl;
+                
+                // Update currentUser object and localStorage
+                if (currentUser) {
+                    currentUser.profileImage = imageDataUrl;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    showNotification('Profile photo updated!', 'success');
+                }
+            };
+            
+            reader.readAsDataURL(file);
+        }
+    });}
+     document.body.appendChild(fileInput);
+    fileInput.click();
+    document.body.removeChild(fileInput);
