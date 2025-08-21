@@ -3200,10 +3200,9 @@ body {
         .contact-info {
             flex: 1;
             min-width: 300px;
-            background: white;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 30px rgba(114, 110, 110, 0.08);
         }
 
         .contact-item {
@@ -3213,20 +3212,17 @@ body {
             padding: 15px;
             border-radius: 8px;
             transition: all 0.3s ease;
-            background: #f8f9fa;
         }
 
         .contact-item:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            background: white;
+            box-shadow: 0 5px 15px rgba(123, 121, 121, 0.1);
         }
 
         .contact-item i {
             font-size: 24px;
             color: #3498db;
             margin-right: 15px;
-            background: #e3f2fd;
             width: 50px;
             height: 50px;
             display: flex;
@@ -3255,7 +3251,6 @@ body {
         .contact-form {
             flex: 1;
             min-width: 300px;
-            background: white;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
